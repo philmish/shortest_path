@@ -25,50 +25,55 @@ curl http://localhost:8986/
 ```json
 {
   "0": {
-    "weight": 2,
+    "weight": 0,
     "route": [
-      "1",
       "0"
     ]
   },
   "1": {
-    "weight": 0,
+    "weight": 2,
     "route": [
+      "0",
       "1"
     ]
   },
   "2": {
-    "weight": 5,
+    "weight": 6,
     "route": [
+      "0",
       "2"
     ]
   },
   "3": {
-    "weight": 5,
+    "weight": 7,
     "route": [
+      "0",
       "1",
       "3"
     ]
   },
   "4": {
-    "weight": 15,
+    "weight": 17,
     "route": [
+      "0",
       "1",
       "3",
       "4"
     ]
   },
   "5": {
-    "weight": 20,
+    "weight": 22,
     "route": [
+      "0",
       "1",
       "3",
       "5"
     ]
   },
   "6": {
-    "weight": 17,
+    "weight": 19,
     "route": [
+      "0",
       "1",
       "3",
       "4",
@@ -76,5 +81,4 @@ curl http://localhost:8986/
     ]
   }
 }
-
 ```

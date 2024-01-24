@@ -26,37 +26,6 @@ type Edge struct {
     Route []string `json:"route"`
 }
 
-var (
-    ZERO = &Node{
-        Value: "0",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    ONE = &Node{
-        Value: "1",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    TWO = &Node{
-        Value: "2",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    THREE = &Node{
-        Value: "3",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    FOUR = &Node{
-        Value: "4",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    FIVE = &Node{
-        Value: "5",
-        Neighbours: make([]*Neighbour, 0),
-    }
-    SIX = &Node{
-        Value: "6",
-        Neighbours: make([]*Neighbour, 0),
-    }
-)
-
 type Graph struct {
     nodes []*Node
 }
@@ -190,7 +159,7 @@ func main() {
     flag.Parse()
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         graph := generateGraph()
-        nodeMap := graph.getShortestPaths("1")
+        nodeMap := graph.getShortestPaths("0")
         resp, err := json.Marshal(nodeMap)
         if err != nil {
             http.Error(w, "Failed to serialize response", http.StatusInternalServerError)
