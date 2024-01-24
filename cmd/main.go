@@ -1,8 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"encoding/json"
+	"flag"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 type Node struct {
@@ -100,7 +106,37 @@ func (g Graph)getShortestPaths(startAddr string) map[string]*Edge {
     return nodeMap
 }
 
-func main() {
+func generateGraph() Graph {
+    var (
+        ZERO = &Node{
+            Value: "0",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        ONE = &Node{
+            Value: "1",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        TWO = &Node{
+            Value: "2",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        THREE = &Node{
+            Value: "3",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        FOUR = &Node{
+            Value: "4",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        FIVE = &Node{
+            Value: "5",
+            Neighbours: make([]*Neighbour, 0),
+        }
+        SIX = &Node{
+            Value: "6",
+            Neighbours: make([]*Neighbour, 0),
+        }
+    )
     ZERO.Neighbours = append(
         ZERO.Neighbours, 
         &Neighbour{Cost: 2, Node: ONE}, 
@@ -140,11 +176,49 @@ func main() {
         &Neighbour{Cost: 2, Node: FOUR},
         &Neighbour{Cost: 6, Node: FIVE},
     )
-    nodes := []*Node{ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX}
-    graph := Graph{nodes: nodes}
-    nodeMap := graph.getShortestPaths("1")
 
-    for k, v := range nodeMap {
-        fmt.Printf("%s -> %v\n", k, *v)
+    return Graph{
+        nodes: []*Node{
+            ZERO, ONE, TWO, THREE, FOUR, FIVE, SIX,
+        },
     }
+}
+
+
+func main() {
+    var listenAddr = flag.String("listen", ":8986", "Address to bind the server to")
+    flag.Parse()
+    http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        graph := generateGraph()
+        nodeMap := graph.getShortestPaths("1")
+        resp, err := json.Marshal(nodeMap)
+        if err != nil {
+            http.Error(w, "Failed to serialize response", http.StatusInternalServerError)
+            return
+        }
+        w.Header().Set("Content-Type", "application/json")
+        w.Write(resp)
+    })
+
+    httpServer := http.Server{
+        Addr: *listenAddr,
+    }
+
+    idleConnectionsClosed := make(chan struct{})
+    go func() {
+        sigChan := make(chan os.Signal, 1)
+        signal.Notify(sigChan, os.Interrupt, syscall.SIGKILL, syscall.SIGINT)
+        <-sigChan
+        if err := httpServer.Shutdown(context.Background()); err != nil {
+            log.Printf("HTTP Server shutdown failed: %s", err.Error())
+        }
+        close(idleConnectionsClosed)
+    }()
+
+    if err := httpServer.ListenAndServe(); err != http.ErrServerClosed {
+        log.Fatalf("HTTP server listen and serve error: %s", err.Error())
+    }
+    <-idleConnectionsClosed
+
+    log.Println("Server Shutdown")
 }
